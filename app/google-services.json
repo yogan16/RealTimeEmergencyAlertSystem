@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "497443422555",
+    "project_id": "alertsystem-a08e4",
+    "storage_bucket": "alertsystem-a08e4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497443422555:android:8cb9eec0ccf4d8d2d09a7e",
+        "android_client_info": {
+          "package_name": "com.fyp.alertsystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP_f4QVVAFH1p5rsV2JSYqG7tUXAalYX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="8dp">
+
+    <TextView
+        android:id="@+id/tvMsg"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:fontFamily="serif"
+        android:text="Sample message"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tvArea"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:fontFamily="serif"
+        android:text="UUM"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:fontFamily="serif"
+        android:text="1 min ago"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tvPriority"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:fontFamily="serif"
+        android:text="High"
+        android:textSize="13sp" />
+</LinearLayout>

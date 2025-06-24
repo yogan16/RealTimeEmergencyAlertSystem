@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">AlertSystem</string>
+
+    <string-array name="alert_types">
+        <item>Select Alert Type</item>
+        <item>Fire</item>
+        <item>Chemical Exposure</item>
+        <item>Medical Emergency</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="area_uum">
+        <item>Select Area</item>
+        <item>SOC</item>
+        <item>SOE</item>
+        <item>SOG</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="priority_levels">
+        <item>Select Priority Level</item>
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+    </string-array>
+</resources>

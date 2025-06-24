@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- AppBar with logout menu -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="ALERT DASHBOARD"
+            app:titleCentered="true"
+            app:titleTextColor="@android:color/white"
+            app:titleTextAppearance="@style/ToolbarTitleFont"
+            app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+            app:menu="@menu/admin_menu"/> <!-- ✅ Corrected here -->
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Alert Type -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Alert Type"
+                android:textStyle="bold"
+                android:fontFamily="serif"/>
+
+            <Spinner
+                android:id="@+id/spinnerAlertType"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/spinner_background"
+                android:entries="@array/alert_types"
+                android:fontFamily="serif" />
+
+            <!-- Custom message for “Others” -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilCustomMessage"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="serif"
+                android:hint="Enter Alert Message"
+                android:visibility="gone"
+                app:boxStrokeColor="@android:color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCustomAlertMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:inputType="textMultiLine"
+                    android:minLines="3" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Area -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Area in UUM"
+                android:textStyle="bold"
+                android:fontFamily="serif"/>
+            <Spinner
+                android:id="@+id/spinnerArea"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="5dp"
+                android:entries="@array/area_uum"
+                android:background="@drawable/spinner_background"
+                android:fontFamily="serif"/>
+
+            <!-- Custom area for “Others” -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilCustomArea"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="serif"
+                android:hint="Enter Area in UUM"
+                android:visibility="gone"
+                app:boxStrokeColor="@android:color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCustomArea"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:inputType="textMultiLine"
+                    android:minLines="3" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Priority -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Priority Level"
+                android:textStyle="bold"
+                android:fontFamily="serif"/>
+            <Spinner
+                android:id="@+id/spinnerPriorityVisible"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="5dp"
+                android:entries="@array/priority_levels"
+                android:background="@drawable/spinner_background"
+                android:fontFamily="serif"/>
+
+            <!-- Create Alert -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCreateAlert"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="CREATE NEW ALERT"
+                android:fontFamily="serif"
+                android:gravity="center"
+                app:icon="@drawable/alert"
+                app:iconGravity="textTop"
+                app:iconSize="48dp"
+                app:iconPadding="8dp"
+                app:iconTint="@android:color/white"
+                app:backgroundTint="?attr/colorSecondary"/>
+
+            <!-- History header -->
+            <TextView
+                android:id="@+id/tvHistoryHeader"
+                android:layout_width="500dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="serif"
+                android:text="VIEW ALERT HISTORY"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Columns -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp">
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:text="Alert Message"
+                    android:fontFamily="serif"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:text="Area"
+                    android:fontFamily="serif"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="20dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:text="Time"
+                    android:fontFamily="serif"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:text="Priority"
+                    android:fontFamily="serif"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- History list -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
