@@ -12,9 +12,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.*;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String PREFS_NAME       = "login_prefs";
-    private static final String KEY_LOGGED_IN    = "isLoggedIn";
-    private static final String KEY_ROLE         = "role";
+    private static final String PREFS_NAME       = AppConfig.PREFS_NAME;
+    private static final String KEY_LOGGED_IN    = AppConfig.KEY_LOGGED_IN;
+    private static final String KEY_ROLE         = AppConfig.KEY_ROLE;
     private static final String KEY_REMEMBER     = "rememberMe";
     private static final String KEY_SAVED_USER   = "savedUsername";
     private static final String KEY_SAVED_PASS   = "savedPassword";
@@ -24,9 +24,6 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox          cbRememberMe;
     private DatabaseReference usersRef;
     private SharedPreferences prefs;
-    private static final String RTDB_URL =
-            "https://alertsystem-a08e4-default-rtdb.asia-southeast1.firebasedatabase.app";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +46,11 @@ public class MainActivity extends AppCompatActivity {
         // Pre-fill if “Remember Me” was checked
         if (prefs.getBoolean(KEY_REMEMBER, false)) {
             etUsername.setText(prefs.getString(KEY_SAVED_USER, ""));
-            etPassword.setText(prefs.getString(KEY_SAVED_PASS, ""));
             cbRememberMe.setChecked(true);
         }
 
         usersRef = FirebaseDatabase
-                .getInstance(RTDB_URL)
+                .getInstance(AppConfig.DATABASE_URL)
                 .getReference("Users");
 
         btnLogin.setOnClickListener(v -> {
@@ -69,9 +65,10 @@ public class MainActivity extends AppCompatActivity {
             // Handle “Remember Me”
             SharedPreferences.Editor edit = prefs.edit();
             if (cbRememberMe.isChecked()) {
+                // Only the username is remembered; never store passwords on the device
                 edit.putBoolean(KEY_REMEMBER, true)
                         .putString(KEY_SAVED_USER, u)
-                        .putString(KEY_SAVED_PASS, p);
+                        .remove(KEY_SAVED_PASS);
             } else {
                 edit.remove(KEY_REMEMBER)
                         .remove(KEY_SAVED_USER)

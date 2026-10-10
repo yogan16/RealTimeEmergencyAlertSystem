@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase config: each developer uses their own project (see README)
+app/google-services.json
+
+# IDE
+.idea/

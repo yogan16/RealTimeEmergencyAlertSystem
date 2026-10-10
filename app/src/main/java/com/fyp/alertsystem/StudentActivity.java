@@ -38,11 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class StudentActivity extends AppCompatActivity {
-    private static final String PREFS_NAME    = "login_prefs";
-    private static final String KEY_LOGGED_IN = "isLoggedIn";
-    private static final String KEY_ROLE      = "role";
-    private static final String RTDB_URL      =
-            "https://alertsystem-a08e4-default-rtdb.asia-southeast1.firebasedatabase.app";
+    private static final String PREFS_NAME = AppConfig.PREFS_NAME;
 
     // Firebase refs
     private DatabaseReference alertsRef;
@@ -53,7 +49,7 @@ public class StudentActivity extends AppCompatActivity {
     private TextView    tvMsg, tvArea, tvTime, tvPriority;
     private Button      btnAck;
     private RecyclerView rvHistory;
-    private StudentHistoryAdapter adapter;
+    private AlertHistoryAdapter adapter;
 
     // Raw-alert history
     private final List<Alert> historyList = new ArrayList<>();
@@ -90,12 +86,12 @@ public class StudentActivity extends AppCompatActivity {
         // RecyclerView + adapter for raw history
         rvHistory = findViewById(R.id.rvHistory);
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new StudentHistoryAdapter(historyList);
+        adapter = new AlertHistoryAdapter(historyList);
         rvHistory.setAdapter(adapter);
 
         // 1) Listen to RAW alerts (identical to Admin)
         alertsRef = FirebaseDatabase
-                .getInstance(RTDB_URL)
+                .getInstance(AppConfig.DATABASE_URL)
                 .getReference("alerts");
 
         alertsRef.orderByChild("timestamp")
@@ -116,7 +112,7 @@ public class StudentActivity extends AppCompatActivity {
 
         // 2) Listen to MERGED alerts for current-alert card
         mergedRef = FirebaseDatabase
-                .getInstance(RTDB_URL)
+                .getInstance(AppConfig.DATABASE_URL)
                 .getReference("mergedAlerts");
 
         // Initial load of all merged entries
@@ -276,8 +272,8 @@ public class StudentActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_logout) {
             getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                     .edit()
-                    .putBoolean(KEY_LOGGED_IN, false)
-                    .remove(KEY_ROLE)
+                    .putBoolean(AppConfig.KEY_LOGGED_IN, false)
+                    .remove(AppConfig.KEY_ROLE)
                     .apply();
             startActivity(new Intent(this, MainActivity.class));
             finish();

@@ -27,9 +27,7 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
@@ -41,18 +39,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AdminActivity extends AppCompatActivity {
-    private static final String PREFS_NAME      = "login_prefs";
-    private static final String KEY_LOGGED_IN   = "isLoggedIn";
-    private static final String KEY_ROLE        = "role";
-    private static final String RTDB_URL        =
-            "https://alertsystem-a08e4-default-rtdb.asia-southeast1.firebasedatabase.app";
-    private static final long   MERGE_WINDOW_MS = 5_000;
+    private static final long MERGE_WINDOW_MS = 5_000;
 
     private final Lock mergeLock = new ReentrantLock(true);
     private final ExecutorService sendPool = Executors.newFixedThreadPool(8);
-
-    private final Lock lockA = new ReentrantLock();
-    private final Lock lockB = new ReentrantLock();
 
     private DatabaseReference alertsRef, mergedRef;
     private Spinner spinnerAlertType, spinnerArea, spinnerPriority;
@@ -78,8 +68,8 @@ public class AdminActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         // Firebase references
-        alertsRef = FirebaseDatabase.getInstance(RTDB_URL).getReference("alerts");
-        mergedRef = FirebaseDatabase.getInstance(RTDB_URL).getReference("mergedAlerts");
+        alertsRef = FirebaseDatabase.getInstance(AppConfig.DATABASE_URL).getReference("alerts");
+        mergedRef = FirebaseDatabase.getInstance(AppConfig.DATABASE_URL).getReference("mergedAlerts");
 
         // Load alert history
         alertsRef.orderByChild("timestamp").addChildEventListener(new ChildEventListener() {
@@ -126,9 +116,6 @@ public class AdminActivity extends AppCompatActivity {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Simulate deadlock (optional)
-        simulateDeadlock();
-
         // Button click: create/send alert
         btnCreateAlert.setOnClickListener(v -> {
             String type = spinnerAlertType.getSelectedItem().toString();
@@ -149,26 +136,23 @@ public class AdminActivity extends AppCompatActivity {
                 return;
             }
 
-            List<Future<?>> futures = new ArrayList<>();
-            // ← pass msg (your free-form text) instead of type
-            futures.add(sendPool.submit(() -> sendOrMerge(msg, area, prio)));
+            Future<?> sent = sendPool.submit(() -> sendOrMerge(msg, area, prio));
 
             new Thread(() -> {
-                for (Future<?> f : futures) {
-                    try { f.get(); }
-                    catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
+                try { sent.get(); }
+                catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
                 }
                 runOnUiThread(() -> {
-                    // Reset UI
+                    // Reset UI (hide the whole input layout, not just the EditText,
+                    // so it reappears when "Others" is picked again)
                     spinnerAlertType.setSelection(0);
                     spinnerArea.setSelection(0);
                     spinnerPriority.setSelection(0);
                     etCustomAlertMessage.setText("");
-                    etCustomAlertMessage.setVisibility(View.GONE);
+                    tilCustomMessage.setVisibility(View.GONE);
                     etCustomArea.setText("");
-                    etCustomArea.setVisibility(View.GONE);
+                    tilCustomArea.setVisibility(View.GONE);
                     Toast.makeText(this, "Alert sent successfully", Toast.LENGTH_SHORT).show();
                 });
             }).start();
@@ -187,13 +171,13 @@ public class AdminActivity extends AppCompatActivity {
         data.put("timestamp", ServerValue.TIMESTAMP);
         alertsRef.push().setValue(data);
 
-        // now MERGE using your free-form text as the key:
+        // Merge repeated alerts for the same message + area within MERGE_WINDOW_MS
         try {
             if (mergeLock.tryLock(2, TimeUnit.SECONDS)) {
                 try {
                     mergedRef
-                            .child(mergeKey)   // ← use mergeKey here
-                            .child(area)
+                            .child(AppConfig.toSafeKey(mergeKey))
+                            .child(AppConfig.toSafeKey(area))
                             .runTransaction(new Transaction.Handler() {
                                 @Override
                                 public Transaction.Result doTransaction(MutableData cur) {
@@ -232,30 +216,6 @@ public class AdminActivity extends AppCompatActivity {
         }
     }
 
-    private void simulateDeadlock() {
-        new Thread(() -> {
-            lockA.lock();
-            try {
-                Thread.sleep(100);
-                lockB.lock();
-                try {}
-                finally { lockB.unlock(); }
-            } catch (InterruptedException ignored) {}
-            finally { lockA.unlock(); }
-        }).start();
-
-        new Thread(() -> {
-            lockB.lock();
-            try {
-                Thread.sleep(100);
-                lockA.lock();
-                try {}
-                finally { lockA.unlock(); }
-            } catch (InterruptedException ignored) {}
-            finally { lockB.unlock(); }
-        }).start();
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -271,8 +231,8 @@ public class AdminActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            prefs.edit().putBoolean(KEY_LOGGED_IN, false).remove(KEY_ROLE).apply();
+            SharedPreferences prefs = getSharedPreferences(AppConfig.PREFS_NAME, MODE_PRIVATE);
+            prefs.edit().putBoolean(AppConfig.KEY_LOGGED_IN, false).remove(AppConfig.KEY_ROLE).apply();
             startActivity(new Intent(this, MainActivity.class));
             finish();
             return true;
