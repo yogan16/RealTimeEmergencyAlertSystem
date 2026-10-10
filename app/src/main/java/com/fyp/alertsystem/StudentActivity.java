@@ -1,7 +1,8 @@
 package com.fyp.alertsystem;
 
+import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,8 +26,8 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -83,6 +85,14 @@ public class StudentActivity extends AppCompatActivity {
         tvPriority  = findViewById(R.id.tvCurrentPriority);
         btnAck      = findViewById(R.id.btnAcknowledge);
 
+        // Push notifications: ask for permission (Android 13+) and listen on the alerts topic
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                   != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+        }
+        FirebaseMessaging.getInstance().subscribeToTopic(AppConfig.ALERTS_TOPIC);
+
         // RecyclerView + adapter for raw history
         rvHistory = findViewById(R.id.rvHistory);
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
@@ -90,9 +100,7 @@ public class StudentActivity extends AppCompatActivity {
         rvHistory.setAdapter(adapter);
 
         // 1) Listen to RAW alerts (identical to Admin)
-        alertsRef = FirebaseDatabase
-                .getInstance(AppConfig.DATABASE_URL)
-                .getReference("alerts");
+        alertsRef = AppConfig.database().getReference("alerts");
 
         alertsRef.orderByChild("timestamp")
                 .addChildEventListener(new ChildEventListener() {
@@ -111,9 +119,7 @@ public class StudentActivity extends AppCompatActivity {
                 });
 
         // 2) Listen to MERGED alerts for current-alert card
-        mergedRef = FirebaseDatabase
-                .getInstance(AppConfig.DATABASE_URL)
-                .getReference("mergedAlerts");
+        mergedRef = AppConfig.database().getReference("mergedAlerts");
 
         // Initial load of all merged entries
         mergedRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -270,12 +276,7 @@ public class StudentActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    .edit()
-                    .putBoolean(AppConfig.KEY_LOGGED_IN, false)
-                    .remove(AppConfig.KEY_ROLE)
-                    .apply();
-            startActivity(new Intent(this, MainActivity.class));
+            AppConfig.logout(this);
             finish();
             return true;
         }

@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "alerts": {
+      ".read": "auth != null",
+      ".indexOn": ["timestamp"],
+      "$alertId": {
+        ".write": "!data.exists() && (root.child('users/' + auth.uid + '/role').val() === 'admin' || root.child('users/' + auth.uid + '/role').val() === 'lecturer')",
+        ".validate": "newData.hasChildren(['message', 'area', 'priority', 'timestamp'])"
+      }
+    },
+    "mergedAlerts": {
+      ".read": "auth != null",
+      "$type": {
+        "$area": {
+          ".write": "root.child('users/' + auth.uid + '/role').val() === 'admin' || root.child('users/' + auth.uid + '/role').val() === 'lecturer'"
+        }
+      }
+    }
+  }
+}

@@ -19,3 +19,9 @@ app/google-services.json
 
 # IDE
 .idea/
+
+# Firebase / Node
+functions/node_modules/
+.firebase/
+.firebaserc
+firebase-debug.log

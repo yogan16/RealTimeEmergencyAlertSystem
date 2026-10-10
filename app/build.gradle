@@ -3,6 +3,14 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
 }
 
+// Optional: set firebase.databaseUrl in local.properties if your Realtime Database
+// URL is not in google-services.json (e.g. databases outside us-central1).
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) {
+    localPropsFile.withInputStream { localProps.load(it) }
+}
+
 android {
     namespace 'com.fyp.alertsystem'
     compileSdk 35
@@ -15,6 +23,9 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "FIREBASE_DATABASE_URL",
+                "\"${localProps.getProperty('firebase.databaseUrl', '')}\""
     }
 
     buildTypes {
@@ -22,6 +33,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    buildFeatures {
+        buildConfig true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11

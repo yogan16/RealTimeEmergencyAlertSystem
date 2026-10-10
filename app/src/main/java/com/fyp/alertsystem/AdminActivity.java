@@ -1,7 +1,5 @@
 package com.fyp.alertsystem;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +20,6 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
@@ -68,8 +65,8 @@ public class AdminActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         // Firebase references
-        alertsRef = FirebaseDatabase.getInstance(AppConfig.DATABASE_URL).getReference("alerts");
-        mergedRef = FirebaseDatabase.getInstance(AppConfig.DATABASE_URL).getReference("mergedAlerts");
+        alertsRef = AppConfig.database().getReference("alerts");
+        mergedRef = AppConfig.database().getReference("mergedAlerts");
 
         // Load alert history
         alertsRef.orderByChild("timestamp").addChildEventListener(new ChildEventListener() {
@@ -231,9 +228,7 @@ public class AdminActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
-            SharedPreferences prefs = getSharedPreferences(AppConfig.PREFS_NAME, MODE_PRIVATE);
-            prefs.edit().putBoolean(AppConfig.KEY_LOGGED_IN, false).remove(AppConfig.KEY_ROLE).apply();
-            startActivity(new Intent(this, MainActivity.class));
+            AppConfig.logout(this);
             finish();
             return true;
         }
