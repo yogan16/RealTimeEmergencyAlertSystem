@@ -11,15 +11,16 @@ Originally built as a university project at Universiti Utara Malaysia (UUM).
 - **Role-based access**: admin, lecturer, and student accounts using Firebase Authentication, with each role stored in the database
 - **Real-time alert feed**: new alerts appear on every device straight away through Firebase Realtime Database listeners
 - **Push notifications**: a Cloud Function sends every new alert to students through Firebase Cloud Messaging (FCM)
-- **Duplicate alert merging**: repeated alerts for the same message and area within 5 seconds are merged into one card with a counter (`High (×3)`), using a database transaction so concurrent senders can't lose updates
+- **Duplicate alert merging**: repeated alerts for the same message and area within 5 seconds are merged into one card with a counter (`High · ×3`), using a database transaction so concurrent senders can't lose updates
 - **Acknowledge queue**: students acknowledge alerts one by one; acknowledged alerts don't come back
+- **Priority-coded UI**: alerts are coloured by priority (red, orange, green) with an icon per alert type, in light and dark mode; admins confirm before an alert is sent
 - **Server-side security rules**: only signed-in users can read alerts, only admins and lecturers can create them, and users can only read their own role
 
 ## Tech stack
 
 | Layer | Technology |
 |---|---|
-| App | Java, Android SDK 35, Material Components, RecyclerView |
+| App | Java, Android SDK 35, Material 3 (light and dark theme), RecyclerView |
 | Auth | Firebase Authentication (email/password) |
 | Data | Firebase Realtime Database + security rules |
 | Push | Firebase Cloud Messaging, Cloud Functions for Firebase (Node.js 20) |

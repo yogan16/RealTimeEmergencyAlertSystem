@@ -1,8 +1,65 @@
 <resources>
     <string name="app_name">AlertSystem</string>
 
+    <!-- Login -->
+    <string name="login_title">UUM Emergency Alert System</string>
+    <string name="login_subtitle">Sign in to receive and send campus alerts</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="remember_me">Remember me</string>
+    <string name="action_login">Log in</string>
+    <string name="login_footer">© 2025 Universiti Utara Malaysia. All rights reserved.</string>
+    <string name="cd_logo">UUM logo</string>
+    <string name="error_fill_both">Enter both email and password</string>
+    <string name="error_invalid_login">Invalid email or password</string>
+    <string name="error_no_role">This account has no role assigned</string>
+    <string name="error_login">Login error: %1$s</string>
+
+    <!-- Dashboards -->
+    <string name="title_admin">Alert Dashboard</string>
+    <string name="title_student">Student Dashboard</string>
+    <string name="action_logout">Log out</string>
+    <string name="header_new_alert">New alert</string>
+    <string name="header_history">Alert history</string>
+    <string name="hint_alert_type">Alert type</string>
+    <string name="hint_custom_message">Alert message</string>
+    <string name="hint_area">Area in UUM</string>
+    <string name="hint_custom_area">Area name</string>
+    <string name="hint_priority">Priority</string>
+    <string name="action_send_alert">Send alert</string>
+    <string name="error_required">Required</string>
+    <string name="confirm_send_title">Send %1$s priority alert?</string>
+    <string name="confirm_send_message">"%1$s" at %2$s will be sent to all students.</string>
+    <string name="action_send">Send</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="alert_sent">Alert sent</string>
+    <string name="error_history_load">Could not load alerts: %1$s</string>
+    <string name="error_merge">Merge error: %1$s</string>
+    <string name="error_merge_lock">Could not acquire merge lock</string>
+
+    <!-- Student -->
+    <string name="current_alert_label">Active alert</string>
+    <string name="action_acknowledge">Acknowledge</string>
+    <string name="all_clear_title">No active alerts</string>
+    <string name="all_clear_message">You\'re all clear. New alerts will appear here instantly.</string>
+    <string name="priority_with_count">%1$s · ×%2$d</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_name">Emergency alerts</string>
+    <string name="notif_channel_desc">Real-time campus emergency alerts</string>
+    <string name="notif_title">%1$s priority emergency alert</string>
+    <string name="notif_text">%1$s at %2$s</string>
+
+    <!-- Empty states -->
+    <string name="empty_history_admin">No alerts sent yet.</string>
+    <string name="empty_history_student">No alerts so far.</string>
+
+    <!-- Time -->
+    <string name="time_now">Just now</string>
+    <string name="history_time">· %1$s</string>
+
+    <!-- Must match the values used in AlertStyle -->
     <string-array name="alert_types">
-        <item>Select Alert Type</item>
         <item>Fire</item>
         <item>Chemical Exposure</item>
         <item>Medical Emergency</item>
@@ -10,7 +67,6 @@
     </string-array>
 
     <string-array name="area_uum">
-        <item>Select Area</item>
         <item>SOC</item>
         <item>SOE</item>
         <item>SOG</item>
@@ -18,7 +74,6 @@
     </string-array>
 
     <string-array name="priority_levels">
-        <item>Select Priority Level</item>
         <item>Low</item>
         <item>Medium</item>
         <item>High</item>

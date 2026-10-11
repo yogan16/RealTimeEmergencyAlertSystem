@@ -4,9 +4,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,7 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -23,8 +27,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
@@ -41,11 +47,14 @@ public class AdminActivity extends AppCompatActivity {
     private final Lock mergeLock = new ReentrantLock(true);
     private final ExecutorService sendPool = Executors.newFixedThreadPool(8);
 
+    private static final String OTHERS = "Others";
+
     private DatabaseReference alertsRef, mergedRef;
-    private Spinner spinnerAlertType, spinnerArea, spinnerPriority;
-    private TextInputLayout tilCustomMessage, tilCustomArea;
+    private TextInputLayout tilAlertType, tilArea, tilPriority, tilCustomMessage, tilCustomArea;
+    private MaterialAutoCompleteTextView ddAlertType, ddArea, ddPriority;
     private TextInputEditText etCustomAlertMessage, etCustomArea;
     private MaterialButton btnCreateAlert;
+    private View progressHistory, tvEmptyHistory;
     private final CopyOnWriteArrayList<Alert> historyList = new CopyOnWriteArrayList<>();
     private AlertHistoryAdapter adapter;
 
@@ -63,6 +72,8 @@ public class AdminActivity extends AppCompatActivity {
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new AlertHistoryAdapter(historyList);
         rv.setAdapter(adapter);
+        progressHistory = findViewById(R.id.progressHistory);
+        tvEmptyHistory  = findViewById(R.id.tvEmptyHistory);
 
         // Firebase references
         alertsRef = AppConfig.database().getReference("alerts");
@@ -75,89 +86,117 @@ public class AdminActivity extends AppCompatActivity {
                 if (a != null) {
                     historyList.add(0, a);
                     adapter.notifyItemInserted(0);
+                    updateHistoryState(false);
                 }
             }
             @Override public void onChildChanged(DataSnapshot ds, String p) {}
             @Override public void onChildRemoved(DataSnapshot ds) {}
             @Override public void onChildMoved(DataSnapshot ds, String p) {}
             @Override public void onCancelled(DatabaseError e) {
-                Toast.makeText(AdminActivity.this, "History load error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                updateHistoryState(false);
+                Toast.makeText(AdminActivity.this,
+                        getString(R.string.error_history_load, e.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
+        // Fires once the initial history has loaded, so the spinner gives way to the list or the empty text
+        alertsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { updateHistoryState(false); }
+            @Override public void onCancelled(@NonNull DatabaseError e) { updateHistoryState(false); }
+        });
+        updateHistoryState(true);
 
         // Bind views
-        spinnerAlertType     = findViewById(R.id.spinnerAlertType);
-        spinnerArea          = findViewById(R.id.spinnerArea);
-        spinnerPriority      = findViewById(R.id.spinnerPriorityVisible);
+        tilAlertType         = findViewById(R.id.tilAlertType);
+        tilArea              = findViewById(R.id.tilArea);
+        tilPriority          = findViewById(R.id.tilPriority);
+        ddAlertType          = findViewById(R.id.ddAlertType);
+        ddArea               = findViewById(R.id.ddArea);
+        ddPriority           = findViewById(R.id.ddPriority);
         tilCustomMessage     = findViewById(R.id.tilCustomMessage);
         etCustomAlertMessage = findViewById(R.id.etCustomAlertMessage);
         tilCustomArea        = findViewById(R.id.tilCustomArea);
         etCustomArea         = findViewById(R.id.etCustomArea);
         btnCreateAlert       = findViewById(R.id.btnCreateAlert);
 
-        // Show/hide custom message input
-        spinnerAlertType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                boolean isOther = "Others".equals(spinnerAlertType.getSelectedItem().toString());
-                tilCustomMessage.setVisibility(isOther ? View.VISIBLE : View.GONE);
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        // Show the free-text fields only when "Others" is picked
+        ddAlertType.setOnItemClickListener((parent, view, pos, id) -> {
+            tilAlertType.setError(null);
+            tilCustomMessage.setVisibility(OTHERS.equals(text(ddAlertType)) ? View.VISIBLE : View.GONE);
         });
-
-        // Show/hide custom area input
-        spinnerArea.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                boolean isOther = "Others".equals(spinnerArea.getSelectedItem().toString());
-                tilCustomArea.setVisibility(isOther ? View.VISIBLE : View.GONE);
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        ddArea.setOnItemClickListener((parent, view, pos, id) -> {
+            tilArea.setError(null);
+            tilCustomArea.setVisibility(OTHERS.equals(text(ddArea)) ? View.VISIBLE : View.GONE);
         });
+        ddPriority.setOnItemClickListener((parent, view, pos, id) -> tilPriority.setError(null));
 
-        // Button click: create/send alert
+        // Button click: validate, confirm, then send
         btnCreateAlert.setOnClickListener(v -> {
-            String type = spinnerAlertType.getSelectedItem().toString();
-            String msg = "Others".equals(type)
-                    ? etCustomAlertMessage.getText().toString().trim()
-                    : type;
+            String type = text(ddAlertType);
+            String msg  = OTHERS.equals(type) ? text(etCustomAlertMessage) : type;
+            String areaInput = text(ddArea);
+            String area = OTHERS.equals(areaInput) ? text(etCustomArea) : areaInput;
+            String prio = text(ddPriority);
 
-            String areaInput = spinnerArea.getSelectedItem().toString();
-            String area = "Others".equals(areaInput)
-                    ? etCustomArea.getText().toString().trim()
-                    : areaInput;
+            boolean ok = require(tilAlertType, type);
+            ok &= !OTHERS.equals(type) || require(tilCustomMessage, msg);
+            ok &= require(tilArea, areaInput);
+            ok &= !OTHERS.equals(areaInput) || require(tilCustomArea, area);
+            ok &= require(tilPriority, prio);
+            if (!ok) return;
 
-            String prio = spinnerPriority.getSelectedItem().toString();
-
-            if (type.startsWith("Select") || area.startsWith("Select") ||
-                    prio.startsWith("Select") || msg.isEmpty()) {
-                Toast.makeText(this, "Please complete all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Future<?> sent = sendPool.submit(() -> sendOrMerge(msg, area, prio));
-
-            new Thread(() -> {
-                try { sent.get(); }
-                catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-                runOnUiThread(() -> {
-                    // Reset UI (hide the whole input layout, not just the EditText,
-                    // so it reappears when "Others" is picked again)
-                    spinnerAlertType.setSelection(0);
-                    spinnerArea.setSelection(0);
-                    spinnerPriority.setSelection(0);
-                    etCustomAlertMessage.setText("");
-                    tilCustomMessage.setVisibility(View.GONE);
-                    etCustomArea.setText("");
-                    tilCustomArea.setVisibility(View.GONE);
-                    Toast.makeText(this, "Alert sent successfully", Toast.LENGTH_SHORT).show();
-                });
-            }).start();
+            new MaterialAlertDialogBuilder(this)
+                    .setIcon(AlertStyle.iconFor(type))
+                    .setTitle(getString(R.string.confirm_send_title, prio.toUpperCase(Locale.ROOT)))
+                    .setMessage(getString(R.string.confirm_send_message, msg, area))
+                    .setNegativeButton(R.string.action_cancel, null)
+                    .setPositiveButton(R.string.action_send, (d, w) -> send(msg, area, prio))
+                    .show();
         });
     }
 
+    private void send(String msg, String area, String prio) {
+        btnCreateAlert.setEnabled(false);
+        Future<?> sent = sendPool.submit(() -> sendOrMerge(msg, area, prio));
+
+        new Thread(() -> {
+            try { sent.get(); }
+            catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            runOnUiThread(() -> {
+                // Reset the form (hide the whole input layout, not just the EditText,
+                // so it reappears when "Others" is picked again)
+                ddAlertType.setText("", false);
+                ddArea.setText("", false);
+                ddPriority.setText("", false);
+                etCustomAlertMessage.setText("");
+                tilCustomMessage.setVisibility(View.GONE);
+                etCustomArea.setText("");
+                tilCustomArea.setVisibility(View.GONE);
+                btnCreateAlert.setEnabled(true);
+                Snackbar.make(findViewById(R.id.adminRoot), R.string.alert_sent, Snackbar.LENGTH_SHORT).show();
+            });
+        }).start();
+    }
+
+    private void updateHistoryState(boolean loading) {
+        progressHistory.setVisibility(loading ? View.VISIBLE : View.GONE);
+        tvEmptyHistory.setVisibility(!loading && historyList.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private static String text(TextView v) {
+        return v.getText() == null ? "" : v.getText().toString().trim();
+    }
+
+    /** Shows "Required" on the field when value is empty. */
+    private boolean require(TextInputLayout til, String value) {
+        boolean ok = !value.isEmpty();
+        til.setError(ok ? null : getString(R.string.error_required));
+        return ok;
+    }
+
     /**
-     * @param mergeKey  the actual text to merge on (either spinner value or custom msg)
+     * @param mergeKey  the actual text to merge on (either the picked alert type or the custom message)
      */
     private void sendOrMerge(String mergeKey, String area, String priority) {
         // raw alert still uses mergeKey as the message
@@ -194,7 +233,7 @@ public class AdminActivity extends AppCompatActivity {
                                     if (e != null) {
                                         runOnUiThread(() ->
                                                 Toast.makeText(AdminActivity.this,
-                                                        "Merge error: "+e.getMessage(),
+                                                        getString(R.string.error_merge, e.getMessage()),
                                                         Toast.LENGTH_SHORT).show()
                                         );
                                     }
@@ -205,7 +244,7 @@ public class AdminActivity extends AppCompatActivity {
                 }
             } else {
                 runOnUiThread(() ->
-                        Toast.makeText(this, "Could not acquire merge lock", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, R.string.error_merge_lock, Toast.LENGTH_SHORT).show()
                 );
             }
         } catch (InterruptedException e) {

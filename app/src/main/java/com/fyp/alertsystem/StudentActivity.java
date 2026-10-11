@@ -3,6 +3,7 @@ package com.fyp.alertsystem;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,17 +12,19 @@ import android.os.Vibrator;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,9 +50,12 @@ public class StudentActivity extends AppCompatActivity {
     private DatabaseReference mergedRef;
 
     // UI
-    private CardView    cardCurrent;
-    private TextView    tvMsg, tvArea, tvTime, tvPriority;
-    private Button      btnAck;
+    private MaterialCardView cardCurrent;
+    private View        cardAllClear, progressHistory, tvEmptyHistory;
+    private ImageView   ivIcon;
+    private TextView    tvMsg, tvArea, tvTime;
+    private Chip        chipPriority;
+    private MaterialButton btnAck;
     private RecyclerView rvHistory;
     private AlertHistoryAdapter adapter;
 
@@ -78,12 +84,14 @@ public class StudentActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Current-alert card
-        cardCurrent = findViewById(R.id.cardCurrentAlert);
-        tvMsg       = findViewById(R.id.tvCurrentMsg);
-        tvArea      = findViewById(R.id.tvCurrentArea);
-        tvTime      = findViewById(R.id.tvCurrentTime);
-        tvPriority  = findViewById(R.id.tvCurrentPriority);
-        btnAck      = findViewById(R.id.btnAcknowledge);
+        cardCurrent  = findViewById(R.id.cardCurrentAlert);
+        cardAllClear = findViewById(R.id.cardAllClear);
+        ivIcon       = findViewById(R.id.ivCurrentIcon);
+        tvMsg        = findViewById(R.id.tvCurrentMsg);
+        tvArea       = findViewById(R.id.tvCurrentArea);
+        tvTime       = findViewById(R.id.tvCurrentTime);
+        chipPriority = findViewById(R.id.tvCurrentPriority);
+        btnAck       = findViewById(R.id.btnAcknowledge);
 
         // Push notifications: ask for permission (Android 13+) and listen on the alerts topic
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -98,9 +106,17 @@ public class StudentActivity extends AppCompatActivity {
         rvHistory.setLayoutManager(new LinearLayoutManager(this));
         adapter = new AlertHistoryAdapter(historyList);
         rvHistory.setAdapter(adapter);
+        progressHistory = findViewById(R.id.progressHistory);
+        tvEmptyHistory  = findViewById(R.id.tvEmptyHistory);
 
         // 1) Listen to RAW alerts (identical to Admin)
         alertsRef = AppConfig.database().getReference("alerts");
+        // Fires once the initial history has loaded, so the spinner gives way to the list or the empty text
+        alertsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { updateHistoryState(false); }
+            @Override public void onCancelled(@NonNull DatabaseError e) { updateHistoryState(false); }
+        });
+        updateHistoryState(true);
 
         alertsRef.orderByChild("timestamp")
                 .addChildEventListener(new ChildEventListener() {
@@ -110,12 +126,13 @@ public class StudentActivity extends AppCompatActivity {
                         if (a != null) {
                             historyList.add(0, a);
                             adapter.notifyItemInserted(0);
+                            updateHistoryState(false);
                         }
                     }
                     @Override public void onChildChanged(DataSnapshot ds, String p) { }
                     @Override public void onChildRemoved(DataSnapshot ds) { }
                     @Override public void onChildMoved(DataSnapshot ds, String p) { }
-                    @Override public void onCancelled(DatabaseError e) { }
+                    @Override public void onCancelled(DatabaseError e) { updateHistoryState(false); }
                 });
 
         // 2) Listen to MERGED alerts for current-alert card
@@ -236,17 +253,42 @@ public class StudentActivity extends AppCompatActivity {
                     MergedAlert next = pendingQueue.peekFirst();
                     if (next == null) {
                         cardCurrent.setVisibility(View.GONE);
+                        cardAllClear.setVisibility(View.VISIBLE);
                         return;
                     }
-                    tvMsg.setText(next.type);
-                    tvArea.setText(next.area);
-                    tvTime.setText("Now");
-                    tvPriority.setText(next.priority + (next.count > 1 ? " (×" + next.count + ")" : ""));
+                    bindCurrentAlert(next);
                     vibrate();
+                    cardAllClear.setVisibility(View.GONE);
                     cardCurrent.setVisibility(View.VISIBLE);
                 }
             }
         });
+    }
+
+    // Colours the card, icon, chip and button by the alert's priority and type
+    private void bindCurrentAlert(MergedAlert a) {
+        int strong = ContextCompat.getColor(this, AlertStyle.colorFor(a.priority));
+        int soft   = ContextCompat.getColor(this, AlertStyle.containerFor(a.priority));
+
+        tvMsg.setText(a.type);
+        tvArea.setText(a.area);
+        tvTime.setText(AlertStyle.timeAgo(this, a.timestamp));
+        ivIcon.setImageResource(AlertStyle.iconFor(a.type));
+        ivIcon.setImageTintList(ColorStateList.valueOf(strong));
+        cardCurrent.setStrokeColor(strong);
+        cardCurrent.setCardBackgroundColor(soft);
+        btnAck.setBackgroundTintList(ColorStateList.valueOf(strong));
+        btnAck.setTextColor(soft);
+
+        String label = a.count > 1
+                ? getString(R.string.priority_with_count, a.priority, a.count)
+                : a.priority;
+        AlertStyle.styleChip(chipPriority, a.priority, label);
+    }
+
+    private void updateHistoryState(boolean loading) {
+        progressHistory.setVisibility(loading ? View.VISIBLE : View.GONE);
+        tvEmptyHistory.setVisibility(!loading && historyList.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     // Simple vibrate feedback

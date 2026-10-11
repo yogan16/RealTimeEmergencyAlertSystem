@@ -2,24 +2,19 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/loginRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="#0D47A1">
-
-    <!-- UUM Logo -->
-
-    <!-- App Title -->
-
-    <!-- Login Card -->
+    android:background="@color/app_bar"
+    android:fitsSystemWindows="true"
+    android:padding="24dp">
 
     <ImageView
         android:id="@+id/logoImage"
-        android:layout_width="230dp"
-        android:layout_height="141dp"
-        android:layout_marginTop="48dp"
+        android:layout_width="220dp"
+        android:layout_height="135dp"
+        android:layout_marginTop="32dp"
+        android:contentDescription="@string/cd_logo"
         android:src="@drawable/logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,120 +24,110 @@
         android:id="@+id/tvAppTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:fontFamily="serif"
+        android:layout_marginTop="24dp"
         android:gravity="center"
-        android:text="UUM Emergency Alert System"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:text="@string/login_title"
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textColor="@color/on_app_bar"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/logoImage" />
 
-    <androidx.cardview.widget.CardView
+    <TextView
+        android:id="@+id/tvAppSubtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:alpha="0.8"
+        android:gravity="center"
+        android:text="@string/login_subtitle"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="@color/on_app_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvAppTitle" />
+
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardLogin"
+        style="@style/Widget.Material3.CardView.Elevated"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        app:cardCornerRadius="15dp"
-        app:cardElevation="8dp"
-        android:background="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/tvAppTitle"
+        app:cardBackgroundColor="?attr/colorSurfaceContainer"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/tvAppSubtitle">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Email Field -->
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp">
+                android:hint="@string/hint_email">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etUsername"
                     android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:fontFamily="serif"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="emailAddress"
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Password Field with eye toggle -->
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Password"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
+                android:hint="@string/hint_password"
                 app:endIconMode="password_toggle">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
-                    android:layout_height="53dp"
-                    android:fontFamily="serif"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="password"
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Remember Me Checkbox -->
-
-            <!-- Login Button -->
-
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/cbRememberMe"
-                android:layout_width="273dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:fontFamily="serif"
-                android:text="Remember Me"
-                android:textColor="#000000" />
+                android:layout_marginTop="8dp"
+                android:text="@string/remember_me" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_button_login"
-                android:fontFamily="serif"
-                android:text="LOGIN"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/action_login"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/brand_red"
+                app:cornerRadius="12dp" />
 
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <!-- Footer -->
     <TextView
         android:id="@+id/tvFooter"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:fontFamily="serif"
+        android:alpha="0.7"
         android:gravity="center"
-        android:text="© 2025 Universiti Utara Malaysia. All rights reserved."
-        android:textColor="#FFFFFF"
-        android:textSize="12sp"
+        android:text="@string/login_footer"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="@color/on_app_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

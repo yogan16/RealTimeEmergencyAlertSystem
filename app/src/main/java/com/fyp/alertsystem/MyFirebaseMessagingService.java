@@ -8,6 +8,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -42,10 +43,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel chan = new NotificationChannel(
                     CHANNEL_ID,
-                    "Emergency Alerts",
+                    getString(R.string.notif_channel_name),
                     NotificationManager.IMPORTANCE_HIGH
             );
-            chan.setDescription("Real-time emergency alerts");
+            chan.setDescription(getString(R.string.notif_channel_desc));
             nm.createNotificationChannel(chan);
         }
 
@@ -60,9 +61,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Uri defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder nb =
                 new NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.log)   // your notification icon
-                        .setContentTitle("Emergency Alert")
-                        .setContentText(msg + " @ " + area + " (" + pr + ")")
+                        .setSmallIcon(R.drawable.ic_stat_alert)
+                        .setContentTitle(getString(R.string.notif_title, pr))
+                        .setContentText(getString(R.string.notif_text, msg, area))
+                        .setColor(ContextCompat.getColor(this, AlertStyle.colorFor(pr)))
                         .setAutoCancel(true)
                         .setSound(defaultSound)
                         .setContentIntent(pi)

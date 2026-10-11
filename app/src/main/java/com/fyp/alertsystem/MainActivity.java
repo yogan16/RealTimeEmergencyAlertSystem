@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             String pass  = etPassword.getText().toString();
 
             if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass)) {
-                Toast.makeText(this, "Enter both fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.error_fill_both, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     .addOnSuccessListener(result -> loadRoleAndContinue(result.getUser()))
                     .addOnFailureListener(e -> {
                         btnLogin.setEnabled(true);
-                        Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.error_invalid_login, Toast.LENGTH_SHORT).show();
                     });
         });
     }
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                             auth.signOut();
                             btnLogin.setEnabled(true);
                             Toast.makeText(MainActivity.this,
-                                    "This account has no role assigned", Toast.LENGTH_LONG).show();
+                                    R.string.error_no_role, Toast.LENGTH_LONG).show();
                             return;
                         }
                         prefs.edit().putString(AppConfig.KEY_ROLE, role).apply();
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onCancelled(@NonNull DatabaseError e) {
                         btnLogin.setEnabled(true);
                         Toast.makeText(MainActivity.this,
-                                "Login error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                getString(R.string.error_login, e.getMessage()), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

@@ -3,182 +3,206 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
-    <!-- AppBar with logout menu -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary">
+        android:background="@color/app_bar">
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
+            style="@style/Widget.AlertSystem.Toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="STUDENT DASHBOARD"
-            app:titleCentered="true"
-            app:titleTextColor="@android:color/white"
-            app:titleTextAppearance="@style/ToolbarTitleFont"
-            app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
-            app:menu="@menu/admin_menu"/> <!-- ✅ Corrected here -->
+            android:theme="@style/ThemeOverlay.AlertSystem.Toolbar"
+            app:title="@string/title_student" />
     </com.google.android.material.appbar.AppBarLayout>
 
-
-    <!-- Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:fillViewport="true"
-        android:padding="16dp">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Popup Alert Card (hidden until new alert arrives) -->
-            <androidx.cardview.widget.CardView
+            <!-- Active alert: colour and icon follow the alert's priority and type -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardCurrentAlert"
+                style="@style/Widget.Material3.CardView.Elevated"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:cardCornerRadius="15dp"
-                app:cardElevation="8dp"
-                app:cardPreventCornerOverlap="false"
-                app:cardUseCompatPadding="true"
-                android:layout_marginBottom="24dp">
+                app:cardCornerRadius="20dp"
+                app:strokeWidth="2dp">
 
-
-            <LinearLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="6dp"
-                        android:background="#FFC107"
-                        android:layout_marginBottom="16dp"/>
+                    <TextView
+                        android:id="@+id/tvCurrentLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/current_alert_label"
+                        android:textAppearance="@style/TextAppearance.AlertSystem.SectionHeader" />
+
+                    <ImageView
+                        android:id="@+id/ivCurrentIcon"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_warning" />
 
                     <TextView
                         android:id="@+id/tvCurrentMsg"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Alert Message"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#0D47A1"
-                        android:layout_gravity="center"
-                        android:fontFamily="serif"/>
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvCurrentArea"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Area in UUM"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:layout_gravity="center"
-                        android:fontFamily="serif"/>
+                        android:layout_marginTop="4dp"
+                        android:drawablePadding="4dp"
+                        android:gravity="center_vertical"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        app:drawableStartCompat="@drawable/ic_place"
+                        app:drawableTint="?attr/colorOnSurfaceVariant" />
 
-                    <TextView
-                        android:id="@+id/tvCurrentTime"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="1 min ago"
-                        android:textSize="14sp"
-                        android:textColor="#777777"
-                        android:layout_gravity="center"
-                        android:fontFamily="serif"/>
+                        android:layout_marginTop="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/tvCurrentPriority"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="High"
-                        android:textSize="14sp"
-                        android:textStyle="italic"
-                        android:textColor="#D32F2F"
-                        android:layout_gravity="center"
-                        android:fontFamily="serif"/>
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tvCurrentPriority"
+                            style="@style/Widget.Material3.Chip.Assist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipStrokeWidth="0dp" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+                    </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnAcknowledge"
-                        style="@style/Widget.MaterialComponents.Button"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_height="56dp"
                         android:layout_marginTop="16dp"
-                        android:text="ACKNOWLEDGE"
-                        android:fontFamily="serif"
-                        android:textAllCaps="true"
-                        app:backgroundTint="@color/design_default_color_error"
-                        android:textColor="#FFFFFF"/>
+                        android:text="@string/action_acknowledge"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        app:cornerRadius="12dp" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- History header -->
-            <TextView
-                android:id="@+id/tvHistoryHeader"
-                android:layout_width="500dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:fontFamily="serif"
-                android:text="VIEW ALERT HISTORY"
-                android:textAllCaps="true"
-                android:textColor="@android:color/black"
-                android:textSize="15sp"
-                android:textStyle="bold"/>
-
-            <!-- History Header Titles -->
-            <LinearLayout
+            <!-- Shown when there is no active alert -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAllClear"
+                style="@style/Widget.Material3.CardView.Filled"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingTop="15dp"
-                android:paddingBottom="8dp">
+                app:cardBackgroundColor="@color/priority_low_container"
+                app:cardCornerRadius="20dp">
 
-                <TextView
-                    android:layout_width="60dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:fontFamily="serif"
-                    android:text="Alert Message"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:fontFamily="serif"
-                    android:text="Area"
-                    android:textStyle="bold" />
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_check_circle"
+                        app:tint="@color/all_clear" />
 
-                <TextView
-                    android:layout_width="20dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:fontFamily="serif"
-                    android:text="Time"
-                    android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:fontFamily="serif"
-                    android:text="Priority"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/all_clear_title"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
 
-            <!-- RecyclerView for past alerts -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/all_clear_message"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- History -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/header_history"
+                android:textAppearance="@style/TextAppearance.AlertSystem.SectionHeader" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressHistory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@+id/tvEmptyHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/empty_history_student"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHistory"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
