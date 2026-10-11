@@ -6,6 +6,12 @@ An Android app for broadcasting campus emergency alerts in real time. Admins and
 
 Originally built as a university project at Universiti Utara Malaysia (UUM).
 
+## Screenshots
+
+| Login | Admin: send an alert | Student: live alert feed |
+|:---:|:---:|:---:|
+| <img src="screenshots/login.png" width="240" alt="Login screen"> | <img src="screenshots/admin.png" width="240" alt="Admin dashboard with the new alert form and alert history"> | <img src="screenshots/student.png" width="240" alt="Student dashboard showing an active Medium priority medical alert"> |
+
 ## Features
 
 - **Role-based access**: admin, lecturer, and student accounts using Firebase Authentication, with each role stored in the database
